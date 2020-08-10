@@ -27,7 +27,7 @@ module.exports = {
         type: Sequelize.STRING,
       },
       color: {
-        type: Sequelize.INTEGER,
+        type: Sequelize.STRING,
       },
       fontFam: {
         type: Sequelize.STRING,

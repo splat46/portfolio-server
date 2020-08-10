@@ -18,7 +18,7 @@ module.exports = (sequelize, DataTypes) => {
       description: { type: DataTypes.STRING, allowNull: false },
       domain: { type: DataTypes.STRING },
       attribute: { type: DataTypes.STRING },
-      color: { type: DataTypes.INTEGER },
+      color: { type: DataTypes.STRING },
       fontFam: { type: DataTypes.INTEGER },
       pagLayout: { type: DataTypes.INTEGER },
       highlight: { type: DataTypes.STRING },
