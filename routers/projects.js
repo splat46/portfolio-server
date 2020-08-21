@@ -1,7 +1,9 @@
+const { Router } = require("express");
+const router = new Router();
 const Projects = require("../models").project;
 
 // Get Project list
-app.get("/projects", async (req, res) => {
+router.get("/projects", async (req, res) => {
   try {
     const projects = await Projects.findAll();
     console.log("projects", projects);
@@ -10,3 +12,5 @@ app.get("/projects", async (req, res) => {
     res.status(400).send({ message: "Error in getting projects" });
   }
 });
+
+module.exports = router;

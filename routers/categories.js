@@ -1,7 +1,9 @@
-const Categories = require("./models").category;
+const { Router } = require("express");
+const router = new Router();
+const Categories = require("../models").category;
 
 // Get category list
-app.get("/categories", async (req, res) => {
+router.get("/categories", async (req, res) => {
   try {
     const category = await Categories.findAll();
     console.log("categories:", category);
@@ -10,3 +12,5 @@ app.get("/categories", async (req, res) => {
     res.status(400).send({ message: "Error in getting categories" });
   }
 });
+
+module.exports = router;
