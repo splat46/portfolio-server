@@ -1,20 +1,21 @@
 const express = require("express");
 const app = express();
-const port = 4000;
-
-const Projects = require("./models").project;
 
 app.get("/", (req, res) => res.send("Hello"));
 
-// Get Project list
-app.get("/projects", async (req, res) => {
-  try {
-    const projects = await Projects.findAll();
-    console.log("projects", projects);
-    res.json(projects);
-  } catch (error) {
-    res.status(400).send({ message: "Error in getting projects" });
-  }
-});
+const jsonParser = express.json();
+
+app.use(jsonParser);
+const projectRouter = require("./routers/projects");
+const userRouter = require("./routers/users");
+const categoryRouter = require("./routers/categories");
+const authRouter = require("./routers/auth");
+
+app.use("/projects", projectRouter);
+app.use("/users", userRouter);
+app.use("/categories", categoryRouter);
+app.use("/auth", authRouter);
+
+const port = process.env.port || 4000;
 
 app.listen(port, () => console.log(`App running on port ${port}!`));
