@@ -1,16 +1,15 @@
-const { Router } = require("express");
-const router = new Router();
-const Users = require("../models").user;
 const bcrypt = require("bcrypt");
+const Router = require("express").Router;
+const User = require("../models").user;
 
-// Get users list
-router.get("/", async (req, res) => {
+const router = new Router();
+
+router.get("/", async (req, res, next) => {
   try {
-    const users = await Users.findAll();
-    console.log("users:", users);
-    res.json(users);
-  } catch (error) {
-    res.status(400).send({ message: "Error in getting users" });
+    const allUsers = await User.findAll();
+    res.json(allUsers);
+  } catch (e) {
+    next(e);
   }
 });
 
@@ -20,10 +19,9 @@ router.post("/", async (req, res, next) => {
     if (!email || !password) {
       res.status(400).send("missing parameters");
     } else {
-      const hashedPassword = bcrypt.hashSync(password, 10);
-      const newUser = await Users.create({
-        ...req.body,
-        password: hashedPassword,
+      const newUser = await User.create({
+        email,
+        password: bcrypt.hashSync(password, 10),
       });
       res.json(newUser);
     }
