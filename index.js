@@ -4,13 +4,14 @@ const projectRouter = require("./routers/projects");
 const categoryRouter = require("./routers/categories");
 const authRouter = require("./routers/auth");
 const authMiddleware = require("./auth/middleware");
+const cors = require("cors");
 
-const port = process.env.port || 4000;
+const port = process.env.port || 5000;
 const app = express();
-
 // Middlewares
 const jsonParser = express.json();
 app.use(jsonParser);
+app.use(cors());
 
 // Routers
 app.use("/projects", authMiddleware, projectRouter);

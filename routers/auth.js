@@ -1,6 +1,6 @@
 const bcrypt = require("bcrypt");
 const { Router } = require("express");
-const { toJWT } = require("../auth/jwt");
+const { toJWT, toData } = require("../auth/jwt");
 const authMiddleware = require("../auth/middleware");
 const User = require("../models").user;
 
@@ -8,61 +8,54 @@ const router = new Router();
 
 router.post("/login", async (req, res, next) => {
   try {
+    // get credentials and i have to look for the user
     const { email, password } = req.body;
-
-    if (!email || !password) {
-      return res
-        .status(400)
-        .send({ message: "Please provide both email and password" });
-    }
+    // check if we get the params
 
     const user = await User.findOne({ where: { email } });
 
-    if (!user || !bcrypt.compareSync(password, user.password)) {
-      return res.status(400).send({
-        message: "User with that email not found or password incorrect",
-      });
-    }
+    if (!user) {
+      res.status(404).send("User not found");
+    } else {
+      const passwordMatch = bcrypt.compareSync(password, user.password);
+      console.log("passwords match?", passwordMatch);
 
-    delete user.dataValues["password"]; // don't send back the password hash
-    const token = toJWT({ userId: user.id });
-    return res.status(200).send({ token, ...user.dataValues });
-  } catch (error) {
-    console.log(error);
-    return res.status(400).send({ message: "Something went wrong, sorry" });
+      if (passwordMatch) {
+        const token = toJWT({ userId: user.id });
+        res.send({ token });
+      } else {
+        res.status(401).send("Wrong password");
+      }
+    }
+  } catch (e) {
+    next(e);
   }
 });
 
-router.post("/signup", async (req, res) => {
-  const { email, password, firstname, lastname, phone } = req.body;
-  if (!email || !password || !firstname || !lastname || !phone) {
-    return res
-      .status(400)
-      .send("Please provide an email, password and a fullname and phone");
-  }
-
+router.post("/signup", async (req, res, next) => {
   try {
-    const newUser = await User.create({
-      email,
-      password: bcrypt.hashSync(password, SALT_ROUNDS),
-      firstname,
-      lastname,
-      phone,
-    });
+    // expect some params
+    // validate if they are there
+    const { email, password, firstName, lastName } = req.body;
+    if (!email || !password || !firstName || !lastName) {
+      res.status(400).send("Missing parameters for sign up");
+    } else {
+      // hash password
+      const hashedPassword = bcrypt.hashSync(password, 10);
 
-    delete newUser.dataValues["password"]; // don't send back the password hash
+      console.log("passwords", password, hashedPassword);
+      // create user.
+      const user = await User.create({
+        email,
+        password: hashedPassword,
+        firstName,
+        lastName,
+      });
 
-    const token = toJWT({ userId: newUser.id });
-
-    res.status(201).json({ token, ...newUser.dataValues });
-  } catch (error) {
-    if (error.email === "SequelizeUniqueConstraintError") {
-      return res
-        .status(400)
-        .send({ message: "There is an existing account with this email" });
+      res.send(user);
     }
-
-    return res.status(400).send({ message: "Something went wrong, sorry" });
+  } catch (e) {
+    next(e);
   }
 });
 
